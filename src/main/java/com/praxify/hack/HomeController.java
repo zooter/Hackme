@@ -2,6 +2,7 @@ package com.praxify.hack;
 
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.slf4j.Logger;
@@ -34,8 +35,9 @@ public class HomeController {
 	/**
 	 * Simply selects the home view to render by returning its name.
 	 */
-	@RequestMapping(value = "/", method = RequestMethod.GET)
-	public String home(Locale locale, Model model) {
+	
+ 	@RequestMapping(value = "/login", method = RequestMethod.POST)
+	public String authenticateUser(Locale locale, Model model) {
 		logger.info("Welcome home! The client locale is {}.", locale);
 		
 		Date date = new Date();
@@ -47,18 +49,33 @@ public class HomeController {
 		
 		return "home";
 	}
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String home(Locale locale, Model model) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);
+		
+		String formattedDate = dateFormat.format(date);
+		
+		model.addAttribute("serverTime", formattedDate );
+		
+		return "login";
+	}
 	
 	
 	@RequestMapping(value="/registerPatient",method=RequestMethod.POST,produces=MediaType.APPLICATION_JSON_VALUE)
-    public void addPatient(){
+    public String addPatient(Model model){
         logger.info("Rest call to test Crud operations");
-        Patient patient=new Patient("Ashwath", "Iyer","01-05-1989" ,"ashwathdr@gmail.com", new Date().toString(),"9738482973",  "123123");
+        Patient patient=new Patient("Jayesh", "Pathade","01-05-1989" ,"ashwathdr@gmail.com", new Date().toString(),"9738482973",  "123123");
         logger.info("Trying to save patient details: "+patient);
         ApplicationContext ctx = new AnnotationConfigApplicationContext(SpringMongoConfig.class);
         MongoOperations mongoOperation = (MongoOperations) ctx.getBean("mongoTemplate");
         mongoOperation.save(patient);
-        System.out.println("Patient Details :"+mongoOperation.findAll(Patient.class));
+        List<Patient> patientList = mongoOperation.findAll(Patient.class);
+        System.out.println("Patient Details :"+patientList);
         logger.info("saved Patient is: "+mongoOperation.findAll(Patient.class));
+        return "successPatientRegistration";
     }
     
 	
